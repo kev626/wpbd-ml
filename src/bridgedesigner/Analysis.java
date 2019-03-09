@@ -963,6 +963,42 @@ public class Analysis {
             }
         }
     }
+
+    public static class BridgeResult {
+        private double cost;
+        private boolean passed;
+
+        public BridgeResult(double cost, boolean passed) {
+            this.cost = cost;
+            this.passed = passed;
+        }
+
+        public double getCost() {
+            return cost;
+        }
+
+        public boolean getPassed() {
+            return passed;
+        }
+    }
+
+    public static BridgeResult analyze(BridgeModel bridge) {
+        Analysis analysis = new Analysis();
+
+        analysis.initialize(bridge);
+        return new BridgeResult(bridge.getTotalCost(), analysis.getStatus() == PASSES);
+    }
+
+    public static BridgeResult analyze(String fileName) {
+        BridgeModel bridge = new BridgeModel();
+
+        try {
+            bridge.read(new File(fileName));
+            return analyze(bridge);
+        } catch (IOException e) {
+            return null;
+        }
+    }
    
     public static void main(String [] args) {
         if (args.length != 1) {

@@ -59,11 +59,21 @@ public class Joint implements HotEditableItem<BridgePaintContext> {
     /*
      * Bitmap images taken from resources
      */
+
+    /*
     public final static Image fixedJointImage = BDApp.getApplication().getImageResource("fixedjoint.png");
     public final static Image normalJointImage = BDApp.getApplication().getImageResource("normaljoint.png");
     public final static Image selectedJointImage = BDApp.getApplication().getImageResource("selectedjoint.png");
     public final static Image hotJointImage = BDApp.getApplication().getImageResource("hotjoint.png");
     public final static Image hotSelectedJointImage = BDApp.getApplication().getImageResource("hotselectedjoint.png");
+    */
+
+    public final static Image fixedJointImage = null;
+    public final static Image normalJointImage = null;
+    public final static Image selectedJointImage = null;
+    public final static Image hotJointImage = null;
+    public final static Image hotSelectedJointImage = null;
+
     /**
      * Number of segements in the cylinders used to represent joints and caps.
      */
