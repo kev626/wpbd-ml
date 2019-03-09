@@ -25,14 +25,12 @@ public class MLBridge {
             System.exit(1);
         }
 
-        Analysis.BridgeResult result = Analysis.analyze(bridge);
-
-        System.out.println(result.getCost());
-        System.out.println(result.getPassed());
+        Analysis.BridgeResult result;
 
         Random random = new Random();
 
         int iterations = 0;
+        int lastSuccessful = 0;
 
         while (true) {
 
@@ -55,21 +53,27 @@ public class MLBridge {
 
             result = Analysis.analyze(bridge);
 
-            System.out.println(result.getCost());
-            System.out.println(result.getPassed());
+
 
             if (!result.getPassed()) {
                 // Revert the bridge to what it was before
-                System.out.println("Reverting to previous state.");
                 for (int i = 0; i < changingMembersPerIteration; i++) {
                     bridge.getMembers().get(changedMembers[i]).setShape(bridge.getInventory().getShape(bridge.getMembers().get(changedMembers[i]).getShape(), 1));
                 }
             } else {
+                System.out.println(result.getCost());
+                lastSuccessful = iterations;
                 try {
                     bridge.write(new File("bridgeout/bridge" + iterations + ".bdc"));
                 } catch (IOException e) {
                     System.out.println("Failed to write bridge!");
                 }
+            }
+
+            if (lastSuccessful + 1000 < iterations) {
+                // Probably no more improvements to be made.
+                System.out.println("No more improvements can be made.");
+                break;
             }
 
             Thread.sleep(10);
