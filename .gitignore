@@ -90,3 +90,6 @@ modules.xml
 /mac/lib/
 /jre/
 /l4j/wpbd.xml
+
+# Bridge output folder
+bridgeout/
