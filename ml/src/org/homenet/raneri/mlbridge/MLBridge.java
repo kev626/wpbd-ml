@@ -32,6 +32,8 @@ public class MLBridge {
         int iterations = 0;
         int lastSuccessful = 0;
 
+        double initialCost = bridge.getTotalCost();
+
         while (true) {
 
             iterations++;
@@ -72,7 +74,7 @@ public class MLBridge {
 
             if (lastSuccessful + 1000 < iterations) {
                 // Probably no more improvements to be made.
-                System.out.println("No more improvements can be made.");
+                System.out.println("Finished optimization. Reduced cost by " + (double)Math.round((1 - bridge.getTotalCost()/initialCost)*1000)/10 + "%");
                 break;
             }
 
