@@ -1,8 +1,10 @@
 package org.homenet.raneri.mlbridge;
 
+import bridgedesigner.Affine;
 import bridgedesigner.Analysis;
 import bridgedesigner.BridgeModel;
 import bridgedesigner.Inventory;
+import bridgedesigner.Joint;
 import bridgedesigner.Material;
 import bridgedesigner.Shape;
 
@@ -33,6 +35,7 @@ public class MLBridge {
         int lastSuccessful = 0;
 
         double initialCost = bridge.getTotalCost();
+        double previousCost = initialCost;
 
         while (true) {
 
@@ -53,18 +56,48 @@ public class MLBridge {
                 }
             }
 
+            // Also change a joint position
+            int jointID = random.nextInt(bridge.getJoints().size());
+            boolean movedJoint = false;
+            int xIncrease = random.nextInt(3) - 1;
+            int yIncrease = random.nextInt(3) - 1;
+            Affine.Point newPoint = bridge.getJoints().get(jointID).getPointWorld().plus(xIncrease, yIncrease);
+            boolean cancelJointMove = false;
+            if (random.nextInt(100) < 100) { // Decrease chance a joint is moved
+                cancelJointMove = true;
+            }
+            for (Joint joint : bridge.getJoints()) {
+                if (joint.getPointWorld().equals(newPoint)) {
+                    cancelJointMove = true;
+                }
+            }
+            if (!bridge.getJoints().get(jointID).isFixed() && !cancelJointMove) {
+                bridge.getJoints().get(jointID).setPointWorld(
+                        newPoint
+                );
+                movedJoint = true;
+            }
+
+
             result = Analysis.analyze(bridge);
 
 
 
-            if (!result.getPassed()) {
+            if (!result.getPassed() || (movedJoint && bridge.getTotalCost() > previousCost)) {
                 // Revert the bridge to what it was before
                 for (int i = 0; i < changingMembersPerIteration; i++) {
                     bridge.getMembers().get(changedMembers[i]).setShape(bridge.getInventory().getShape(bridge.getMembers().get(changedMembers[i]).getShape(), 1));
                 }
+
+                if (movedJoint) {
+                    bridge.getJoints().get(jointID).setPointWorld(
+                            bridge.getJoints().get(jointID).getPointWorld().plus(-xIncrease, -yIncrease)
+                    );
+                }
             } else {
                 System.out.println(result.getCost());
                 lastSuccessful = iterations;
+                previousCost = result.getCost();
                 try {
                     bridge.write(new File("bridgeout/bridge" + iterations + ".bdc"));
                 } catch (IOException e) {

@@ -155,6 +155,10 @@ public class Joint implements HotEditableItem<BridgePaintContext> {
         return ptWorld;
     }
 
+    public void setPointWorld(Affine.Point ptWorld) {
+        this.ptWorld = ptWorld;
+    }
+
     /**
      * Set the index of this joint.
      * 
