@@ -896,7 +896,7 @@ public class BridgeModel {
      * @param readBuf bytes containing ASCII representation of bridge
      * @throws java.io.IOException something went wrong with parsing
      */
-    protected void parseBytes(byte[] readBuf) throws IOException {
+    public void parseBytes(byte[] readBuf) throws IOException {
         this.readBuf = readBuf;
         readPtr = 0;
         DraftingGrid grid = new DraftingGrid(DraftingGrid.FINE_GRID);
@@ -1034,7 +1034,7 @@ public class BridgeModel {
      * Return a byte array containing an ASCII text representation of this bridge.
      * @return ASCII text as bytes
      */
-    protected byte[] toBytes() {
+    public byte[] toBytes() {
         byte[] bytes = null;
         try {
             bytes = toString().getBytes("ASCII");
