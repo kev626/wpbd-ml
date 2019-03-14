@@ -14,21 +14,27 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Random;
 import java.util.SortedMap;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 
 public class MLBridge {
 
-    private static Queue<BridgeModel> bridgeQueue;
-    public static synchronized BridgeModel getNextBridge() {
-        return bridgeQueue.remove();
+    private static PriorityBlockingQueue<SortableBridge> bridgeQueue;
+    public static BridgeModel getNextBridge() {
+        try {
+            return bridgeQueue.poll(120, TimeUnit.MINUTES).getBridge();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static synchronized void addBridge(SortableBridge bridge) {
+        bridgeQueue.add(bridge);
     }
 
     public static void main(String[] args) throws InterruptedException {
 
-        bridgeQueue = new ArrayBlockingQueue(1024);
+        bridgeQueue = new PriorityBlockingQueue();
 
         BridgeModel bridge = new BridgeModel();
         try {
@@ -38,44 +44,12 @@ public class MLBridge {
             System.exit(1);
         }
 
-        Random random = new Random();
+        System.out.println("Calculating cost of initial bridge...");
+        bridgeQueue.add(new SortableBridge(bridge, optimize(bridge).getTotalCost()));
 
-        bridgeQueue.offer(bridge);
-        for (int i = 0; i < 1000; i++) {
-            try {
-                BridgeModel mod = new BridgeModel();
-                mod.parseBytes(bridge.toBytes());
-
-                for (int j = 0; j < 2; j++) {
-                    int jointID = random.nextInt(mod.getJoints().size());
-                    int xIncrease = random.nextInt(3) - 1;
-                    int yIncrease = random.nextInt(3) - 1;
-                    Affine.Point newPoint = mod.getJoints().get(jointID).getPointWorld().plus(xIncrease, yIncrease);
-
-                    for (Joint joint : mod.getJoints()) {
-                        if (joint.getPointWorld().equals(newPoint)) {
-                            j--;
-                            continue;
-                        }
-                    }
-
-                    if (!mod.getJoints().get(jointID).isFixed()) {
-                        mod.getJoints().get(jointID).setPointWorld(
-                                newPoint
-                        );
-                        bridgeQueue.offer(mod);
-                    } else {
-                        j--;
-                        continue;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        ExecutorService executor = Executors.newFixedThreadPool(16);
-        for (int i = 0; i < 16; i++) {
+        // Start workers
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        for (int i = 0; i < 4; i++) {
             Runnable worker = new WorkerThread();
             executor.execute(worker);
         }
@@ -170,8 +144,6 @@ public class MLBridge {
                 // Probably no more improvements to be made.
                 break;
             }
-
-            Thread.sleep(10);
         }
 
         lastSuccessful = iterations;
@@ -213,8 +185,6 @@ public class MLBridge {
                 // Probably no more improvements to be made.
                 break;
             }
-
-            Thread.sleep(10);
         }
 
         return bridge;
