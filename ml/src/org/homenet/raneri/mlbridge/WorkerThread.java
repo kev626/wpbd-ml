@@ -24,8 +24,8 @@ public class WorkerThread implements Runnable {
 
                         for (int j = 0; j < 2; j++) {
                             int jointID = random.nextInt(mod.getJoints().size());
-                            int xIncrease = random.nextInt(3) - 1;
-                            int yIncrease = random.nextInt(3) - 1;
+                            double xIncrease = (double) (random.nextInt(3) - 1) / 4;
+                            double yIncrease = (double) (random.nextInt(3) - 1) / 4;
                             if (xIncrease == 0 && yIncrease == 0) {
                                 j--;
                                 continue;

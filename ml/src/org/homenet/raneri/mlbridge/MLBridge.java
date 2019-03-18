@@ -48,8 +48,8 @@ public class MLBridge {
         bridgeQueue.add(new SortableBridge(bridge, optimize(bridge).getTotalCost()));
 
         // Start workers
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        for (int i = 0; i < 4; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(6);
+        for (int i = 0; i < 6; i++) {
             Runnable worker = new WorkerThread();
             executor.execute(worker);
         }
@@ -98,8 +98,8 @@ public class MLBridge {
             // Also change a joint position
             int jointID = random.nextInt(bridge.getJoints().size());
             boolean movedJoint = false;
-            int xIncrease = random.nextInt(3) - 1;
-            int yIncrease = random.nextInt(3) - 1;
+            double xIncrease = (double) (random.nextInt(3) - 1) / 4;
+            double yIncrease = (double) (random.nextInt(3) - 1) / 4;
             Affine.Point newPoint = bridge.getJoints().get(jointID).getPointWorld().plus(xIncrease, yIncrease);
             boolean cancelJointMove = true;
                 /*
