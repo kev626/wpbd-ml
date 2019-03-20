@@ -16,16 +16,20 @@ public class WorkerThread implements Runnable {
 
                 BridgeModel bridge = MLBridge.getNextBridge();
                 System.out.println("Picking up new bridge");
+                System.out.println("Cost: " + MLBridge.optimize(bridge).getTotalCost());
 
                 for (int i = 0; i < 100; i++) {
                     try {
                         BridgeModel mod = new BridgeModel();
                         mod.parseBytes(bridge.toBytes());
 
-                        for (int j = 0; j < 2; j++) {
+                        int mods = random.nextInt(3) + 1;
+
+                        for (int j = 0; j < mods; j++) {
                             int jointID = random.nextInt(mod.getJoints().size());
-                            double xIncrease = (double) (random.nextInt(3) - 1) / 4;
-                            double yIncrease = (double) (random.nextInt(3) - 1) / 4;
+                            int modSize = (int) Math.pow(2,random.nextInt(3));
+                            double xIncrease = (double) (random.nextInt(3) - 1) / modSize;
+                            double yIncrease = (double) (random.nextInt(3) - 1) / modSize;
                             if (xIncrease == 0 && yIncrease == 0) {
                                 j--;
                                 continue;
@@ -43,18 +47,18 @@ public class WorkerThread implements Runnable {
                                 mod.getJoints().get(jointID).setPointWorld(
                                         newPoint
                                 );
-
-                                BridgeModel newBridge = MLBridge.optimize(mod);
-                                newBridge.setDesignedBy("Kevin Raneri");
-                                newBridge.write(new File("bridgeout/" + Math.round(newBridge.getTotalCost()) + ".bdc"));
-                                System.out.println("Final cost: " + newBridge.getTotalCost());
-
-                                MLBridge.addBridge(new SortableBridge(bridge, mod.getTotalCost()));
                             } else {
                                 j--;
                                 continue;
                             }
                         }
+
+                        BridgeModel newBridge = MLBridge.optimize(mod);
+                        newBridge.setDesignedBy("Kevin Raneri");
+                        newBridge.write(new File("bridgeout/" + Math.round(newBridge.getTotalCost()) + ".bdc"));
+                        //System.out.println("Final cost: " + newBridge.getTotalCost());
+
+                        MLBridge.addBridge(new SortableBridge(mod, newBridge.getTotalCost()));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -63,7 +67,7 @@ public class WorkerThread implements Runnable {
                 BridgeModel newBridge = MLBridge.optimize(bridge);
                 newBridge.setDesignedBy("Kevin Raneri");
                 newBridge.write(new File("bridgeout/" + Math.round(newBridge.getTotalCost()) + ".bdc"));
-                System.out.println("Final cost: " + newBridge.getTotalCost());
+                //System.out.println("Final cost: " + newBridge.getTotalCost());
             }
         } catch (Exception e) {
             e.printStackTrace();
