@@ -18,6 +18,9 @@ import java.util.concurrent.*;
 
 public class MLBridge {
 
+    private static Object threadLock = new Object();
+    private static double lowestCost = Double.MAX_VALUE;
+
     private static PriorityBlockingQueue<SortableBridge> bridgeQueue;
     public static BridgeModel getNextBridge() {
         try {
@@ -162,7 +165,8 @@ public class MLBridge {
                 Shape oldShape = bridge.getMembers().get(changingMember).getShape();
                 boolean canIncreaseShapeSize = (bridge.getInventory().getAllowedShapeChanges(oldShape) & Inventory.SHAPE_INCREASE_SIZE) == Inventory.SHAPE_INCREASE_SIZE;
                 if (!canIncreaseShapeSize) {
-                    i--;
+                    System.out.println("Can't increase size! Member " + changingMember + " Shape " + oldShape.toString());
+                    return bridge;
                 } else {
                     changedMembers[i] = changingMember;
                     bridge.getMembers().get(changingMember).setShape(bridge.getInventory().getShape(oldShape, 1));
@@ -171,7 +175,7 @@ public class MLBridge {
 
             result = Analysis.analyze(bridge);
 
-            if (!result.getPassed() || result.getCost() > previousCost) {
+            if (!result.getPassed() || result.getCost() >= previousCost) {
                 // Revert
                 for (int i = 0; i < changingMembersPerIteration; i++) {
                     bridge.getMembers().get(changedMembers[i]).setShape(bridge.getInventory().getShape(bridge.getMembers().get(changedMembers[i]).getShape(), -1));

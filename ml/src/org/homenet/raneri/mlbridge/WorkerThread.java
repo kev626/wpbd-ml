@@ -1,6 +1,7 @@
 package org.homenet.raneri.mlbridge;
 
 import bridgedesigner.Affine;
+import bridgedesigner.Analysis;
 import bridgedesigner.BridgeModel;
 import bridgedesigner.Joint;
 
@@ -19,6 +20,7 @@ public class WorkerThread implements Runnable {
                 System.out.println("Cost: " + MLBridge.optimize(bridge).getTotalCost());
 
                 for (int i = 0; i < 100; i++) {
+
                     try {
                         BridgeModel mod = new BridgeModel();
                         mod.parseBytes(bridge.toBytes());
@@ -54,11 +56,16 @@ public class WorkerThread implements Runnable {
                         }
 
                         BridgeModel newBridge = MLBridge.optimize(mod);
-                        newBridge.setDesignedBy("Kevin Raneri");
-                        newBridge.write(new File("bridgeout/" + Math.round(newBridge.getTotalCost()) + ".bdc"));
-                        //System.out.println("Final cost: " + newBridge.getTotalCost());
+                        if (Analysis.analyze(newBridge).getPassed()) {
+                            newBridge.setDesignedBy("Kevin Raneri");
+                            newBridge.write(new File("bridgeout/" + Math.round(newBridge.getTotalCost()) + ".bdc"));
 
-                        MLBridge.addBridge(new SortableBridge(mod, newBridge.getTotalCost()));
+                            MLBridge.addBridge(new SortableBridge(mod, newBridge.getTotalCost()));
+                        } else {
+                            System.out.println("A non-passing bridge was optimized... weird.");
+                        }
+
+                        //MLBridge.sendNotif(newBridge.getTotalCost());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

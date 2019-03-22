@@ -1129,8 +1129,9 @@ public class Member implements HotEditableItem<BridgePaintContext> {
      * @return string representation
      */
     @Override public String toString() {
-        return BDApp.getResourceMap(Member.class).getString("rollover.text", 
-                getNumber(), shape.getName(), material, shape.getSection());
+        return shape.getName() + " " + getNumber() + " " + shape.getSection();
+        /*return BDApp.getResourceMap(Member.class).getString("rollover.text",
+                getNumber(), shape.getName(), material, shape.getSection());*/
     }
 
     /**
