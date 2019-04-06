@@ -10,6 +10,7 @@ import bridgedesigner.Shape;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Random;
@@ -37,6 +38,23 @@ public class MLBridge {
 
     public static void main(String[] args) throws InterruptedException {
 
+        System.out.println("\n[*]");
+        System.out.println("[*] Software created by Kevin Raneri");
+        System.out.println("[*] https://github.com/kev626/wpbd-ml");
+        System.out.println("[*]\n\n");
+
+        int coreCount = 1;
+
+        try {
+            String coresStr = new String(Files.readAllBytes(new File("cores.txt").toPath()));
+            coreCount = Integer.parseInt(coresStr);
+        } catch (Exception e) {
+            coreCount = 1;
+            System.out.println("Could not open cores.txt, assuming 1 core.");
+        } finally {
+            System.out.println("Using " + coreCount + " CPU cores for multithreading.\n");
+        }
+
         bridgeQueue = new PriorityBlockingQueue();
 
         BridgeModel bridge = new BridgeModel();
@@ -51,8 +69,8 @@ public class MLBridge {
         bridgeQueue.add(new SortableBridge(bridge, optimize(bridge).getTotalCost()));
 
         // Start workers
-        ExecutorService executor = Executors.newFixedThreadPool(6);
-        for (int i = 0; i < 6; i++) {
+        ExecutorService executor = Executors.newFixedThreadPool(coreCount);
+        for (int i = 0; i < coreCount; i++) {
             Runnable worker = new WorkerThread();
             executor.execute(worker);
         }
